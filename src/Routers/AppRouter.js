@@ -1,30 +1,36 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom'
+import {
+    BrowserRouter as Router,
+    Switch,
+    Redirect
+  } from 'react-router-dom';
 import { JournalScreen } from '../components/journal/JournalScreen';
 import { AuthRouter } from './AuthRouter';
 import { firebase } from '../firebase/firebase-config';
 import { login } from '../actions/auth';
+import { PublicRoutes } from './PublicRoutes';
+import { PrivateRoutes } from './PrivateRoutes';
 
 export const AppRouter = () => {
 
-    const [cheking, setcheking] = useState(true);
-
-    const [isLoggenIn, setisLoggenIn] = useState(false);
-
     const dispatch = useDispatch();
+    
+    const [ cheking, setcheking ] = useState(true);
+
+    const [ isLoggenIn, setisLoggenIn ] = useState(false);
 
     useEffect(() => {
         firebase.auth().onAuthStateChanged(user => {
             if (user?.uid) {
                 dispatch(login(user.uid, user.displayName));
                 setisLoggenIn(true);
-            }else{
+            } else {
                 setisLoggenIn(false);
             }
             setcheking(false);
         });
-    }, [dispatch])
+    }, [ dispatch, setisLoggenIn, setcheking ])
 
     if (cheking) {
         return (
@@ -37,9 +43,22 @@ export const AppRouter = () => {
         <Router>
             <div>
                 <Switch>
-                    <Route path="/auth" component={AuthRouter} />
-                    <Route exact path="/" component={JournalScreen} />
-                    <Redirect to="/auth/login" />
+
+                    <PublicRoutes
+                        path="/auth"
+                        component={AuthRouter}
+                        isLoggenIn={isLoggenIn}
+                    />
+
+                    <PrivateRoutes
+                        exact
+                        path="/"
+                        component={JournalScreen}
+                        isLoggenIn={isLoggenIn}
+                    />
+
+                    <Redirect to="/auth/login"/>
+
                 </Switch>
             </div>
         </Router>

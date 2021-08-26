@@ -1,6 +1,7 @@
 import { types } from "../types/types";
 import { firebase, googleAuthProvider } from "../firebase/firebase-config";
 import { startLoading, FinishLoading } from "./ui";
+import Swal from 'sweetalert2';
 
 export const starLoginWithEmailAndPassword = (email, password) => {
     return dispatch => {
@@ -11,8 +12,8 @@ export const starLoginWithEmailAndPassword = (email, password) => {
             dispatch( FinishLoading() );
         })
         .catch(error => {
-            console.log(error)
             dispatch( FinishLoading() );
+            Swal.fire('Faile',error.message,'error')
         })
     }
 }
@@ -33,7 +34,10 @@ export const registerWithEmailAndPassword = ( email, password, name ) => {
         .then( async ({ user }) => {
             await user.updateProfile( {displayName: name} )
             dispatch(login(user.ui,user.displayName));
-        });
+        })
+        .catch(error => {
+            Swal.fire('Faile',error.message,'error')
+        })
     }
 }
 
